@@ -1,0 +1,11 @@
+{
+  "name": "Pronos Miss France 2027",
+  "short_name": "Pronos Miss",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#e0218a",
+  "theme_color": "#e0218a",
+  "icons": [
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
