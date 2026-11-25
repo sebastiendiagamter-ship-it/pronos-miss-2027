@@ -29,6 +29,21 @@
   var AUTORISEES = ['pronosMF27-id2', 'pronosMF27-code', 'pronosMF27-admin'];
   function lire() { try { return JSON.parse(localStorage.getItem(CLE) || '{}') || {}; } catch (e) { return {}; } }
   function ecrire(m) { try { localStorage.setItem(CLE, JSON.stringify(m)); } catch (e) {} }
+  /* Partage de l'image du podium : seule cette page peut ouvrir le menu Partager de l'iPhone */
+  function partager(d, e) {
+    function reponse(r) { try { e.source.postMessage({ pronos: 1, op: 'shareResult', result: r }, e.origin); } catch (err) {} }
+    var fichier, donnees;
+    try {
+      fichier = new File([d.blob], 'mon-podium-miss-france-2027.png', { type: 'image/png' });
+      donnees = { files: [fichier] };
+      if (typeof d.text === 'string') donnees.text = d.text.slice(0, 300);
+      if (!navigator.share || !navigator.canShare || !navigator.canShare({ files: [fichier] })) { reponse('fail'); return; }
+      navigator.share(donnees).then(function () { reponse('ok'); }, function (err) {
+        reponse(err && err.name === 'AbortError' ? 'ok' : 'fail');
+      });
+      reponse('started');
+    } catch (err) { reponse('fail'); }
+  }
   window.addEventListener('message', function (e) {
     var hote = '';
     try { hote = new URL(e.origin).hostname; } catch (err) { return; }
@@ -42,6 +57,8 @@
       m[d.k] = d.v; ecrire(m);
     } else if (d.op === 'del' && AUTORISEES.indexOf(d.k) !== -1) {
       delete m[d.k]; ecrire(m);
+    } else if (d.op === 'share' && d.blob instanceof Blob && d.blob.size < 8000000) {
+      partager(d, e);
     }
   });
 })();
